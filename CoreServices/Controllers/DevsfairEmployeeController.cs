@@ -37,13 +37,29 @@ namespace CoreServices.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult<List<DevsfairEmployee>>> UpdateEmployee(DevsfairEmployee employee)
+        public async Task<ActionResult<List<DevsfairEmployee>>> UpdateEmployee(DevsfairEmployee request)
+        {
+            var employee = employees.Find(h => h.EmployeeID == request.EmployeeID);
+            if (employee == null)
+                return BadRequest("Employee not found.");
+
+            employee.EmployeeID = request.EmployeeID;
+            employee.EmployeeName = request.EmployeeName;
+            employee.EmployeeAge = request.EmployeeAge;
+            employee.EmployeePhone = request.EmployeePhone;
+            employee.EmployeeDescription = request.EmployeeDescription;
+            
+            return Ok(employees);
+        }
+
+        [HttpDelete("{employeeid}")]
+        public async Task<ActionResult<List<DevsfairEmployee>>> Delete(int employeeid)
         {
             var employee = employees.Find(h => h.EmployeeID == employeeid);
             if (employee == null)
                 return BadRequest("Employee not found.");
-            employees.Add(employee);
-            return Ok(employees);
+            employees.Remove(employee);
+            return Ok(employee);
         }
     }
 }
