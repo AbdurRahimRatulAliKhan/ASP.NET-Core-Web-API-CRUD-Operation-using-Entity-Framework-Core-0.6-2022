@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using CoreServices.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CoreServices.Controllers
 {
@@ -13,17 +15,24 @@ namespace CoreServices.Controllers
                 new DevsfairEmployee{ EmployeeID = 1010110, EmployeeName = "Ratul Ali", EmployeeAge = 25, EmployeePhone = "+880 17 xxx xxx xx", EmployeeDescription = "Softweare Engineer I"},
                 new DevsfairEmployee{ EmployeeID = 1010111, EmployeeName = "Md. Habibur Rahman", EmployeeAge = 27, EmployeePhone = "+880 17 xxx xxx xx", EmployeeDescription = "Softweare Engineer"}
             };
+        private readonly DataContext _context;
+
+        public DevsfairEmployeeController(DataContext context)
+        {
+            _context = context;
+        }
 
         [HttpGet]
         public async Task<ActionResult<List<DevsfairEmployee>>> Get()
         {
-            return Ok(employees);
+            return Ok(await _context.DevsfairEmployees.ToListAsync());
         }
 
         [HttpGet("{employeeid}")]
         public async Task<ActionResult<List<DevsfairEmployee>>> Get(int employeeid)
         {
-            var employee = employees.Find(h => h.EmployeeID == employeeid);
+            //var employee = employees.Find(h => h.EmployeeID == employeeid);
+            var employee = await _context.DevsfairEmployees.FindAsync(employeeid);
             if (employee == null)
                 return BadRequest("Employee not found.");
             return Ok(employee);
@@ -32,24 +41,26 @@ namespace CoreServices.Controllers
         [HttpPost]
         public async Task<ActionResult<List<DevsfairEmployee>>> AddEmployee(DevsfairEmployee employee)
         {
-            employees.Add(employee);
-            return Ok(employees);
+            _context.DevsfairEmployees.Add(employee);
+            await _context.SaveChangesAsync();
+
+            return Ok(await _context.DevsfairEmployees.ToListAsync());
         }
 
         [HttpPut]
         public async Task<ActionResult<List<DevsfairEmployee>>> UpdateEmployee(DevsfairEmployee request)
         {
-            var employee = employees.Find(h => h.EmployeeID == request.EmployeeID);
+            var employee = await _context.DevsfairEmployees.FindAsync(request.EmployeeID);
             if (employee == null)
                 return BadRequest("Employee not found.");
 
-            employee.EmployeeID = request.EmployeeID;
+            //employee.EmployeeID = request.EmployeeID;
             employee.EmployeeName = request.EmployeeName;
             employee.EmployeeAge = request.EmployeeAge;
             employee.EmployeePhone = request.EmployeePhone;
             employee.EmployeeDescription = request.EmployeeDescription;
-            
-            return Ok(employees);
+
+            return Ok(await _context.DevsfairEmployees.ToListAsync());
         }
 
         [HttpDelete("{employeeid}")]
