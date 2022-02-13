@@ -9,12 +9,12 @@ namespace CoreServices.Controllers
     [ApiController]
     public class DevsfairEmployeeController : ControllerBase
     {
-        private static List<DevsfairEmployee> employees = new List<DevsfairEmployee>
-            {
-                new DevsfairEmployee{ EmployeeID = 1010101, EmployeeName = "Lisan Sojib", EmployeeAge = 32, EmployeePhone = "+880 17 xxx xxx xx", EmployeeDescription = "Founder"},
-                new DevsfairEmployee{ EmployeeID = 1010110, EmployeeName = "Ratul Ali", EmployeeAge = 25, EmployeePhone = "+880 17 xxx xxx xx", EmployeeDescription = "Softweare Engineer I"},
-                new DevsfairEmployee{ EmployeeID = 1010111, EmployeeName = "Md. Habibur Rahman", EmployeeAge = 27, EmployeePhone = "+880 17 xxx xxx xx", EmployeeDescription = "Softweare Engineer"}
-            };
+        //private static List<DevsfairEmployee> employees = new List<DevsfairEmployee>
+        //    {
+        //        new DevsfairEmployee{ EmployeeID = 1010101, EmployeeName = "Lisan Sojib", EmployeeAge = 32, EmployeePhone = "+880 17 xxx xxx xx", EmployeeDescription = "Founder"},
+        //        new DevsfairEmployee{ EmployeeID = 1010110, EmployeeName = "Ratul Ali", EmployeeAge = 25, EmployeePhone = "+880 17 xxx xxx xx", EmployeeDescription = "Softweare Engineer I"},
+        //        new DevsfairEmployee{ EmployeeID = 1010111, EmployeeName = "Md. Habibur Rahman", EmployeeAge = 27, EmployeePhone = "+880 17 xxx xxx xx", EmployeeDescription = "Softweare Engineer"}
+        //    };
         private readonly DataContext _context;
 
         public DevsfairEmployeeController(DataContext context)
@@ -50,15 +50,17 @@ namespace CoreServices.Controllers
         [HttpPut]
         public async Task<ActionResult<List<DevsfairEmployee>>> UpdateEmployee(DevsfairEmployee request)
         {
-            var employee = await _context.DevsfairEmployees.FindAsync(request.EmployeeID);
-            if (employee == null)
+            var dbemployee = await _context.DevsfairEmployees.FindAsync(request.EmployeeID);
+            if (dbemployee == null)
                 return BadRequest("Employee not found.");
 
             //employee.EmployeeID = request.EmployeeID;
-            employee.EmployeeName = request.EmployeeName;
-            employee.EmployeeAge = request.EmployeeAge;
-            employee.EmployeePhone = request.EmployeePhone;
-            employee.EmployeeDescription = request.EmployeeDescription;
+            dbemployee.EmployeeName = request.EmployeeName;
+            dbemployee.EmployeeAge = request.EmployeeAge;
+            dbemployee.EmployeePhone = request.EmployeePhone;
+            dbemployee.EmployeeDescription = request.EmployeeDescription;
+
+            await _context.SaveChangesAsync();
 
             return Ok(await _context.DevsfairEmployees.ToListAsync());
         }
@@ -66,11 +68,15 @@ namespace CoreServices.Controllers
         [HttpDelete("{employeeid}")]
         public async Task<ActionResult<List<DevsfairEmployee>>> Delete(int employeeid)
         {
-            var employee = employees.Find(h => h.EmployeeID == employeeid);
-            if (employee == null)
+            var dbemployee = await _context.DevsfairEmployees.FindAsync(employeeid);
+            if (dbemployee == null)
                 return BadRequest("Employee not found.");
-            employees.Remove(employee);
-            return Ok(employee);
+
+
+            _context.DevsfairEmployees.Remove(dbemployee);
+            await _context.SaveChangesAsync();
+
+            return Ok(await _context.DevsfairEmployees.ToListAsync());
         }
     }
 }
